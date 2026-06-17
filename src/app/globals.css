@@ -1,0 +1,65 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap");
+@import "tailwindcss";
+
+:root {
+  /* DVLA Navy / Gold palette */
+  --dvla-navy:       #1e3a8a;
+  --dvla-navy-light: #2d4ea0;
+  --dvla-navy-dark:  #132759;
+  --dvla-gold:       #d97706;
+  --dvla-gold-light: #f59e0b;
+  --dvla-green:      #059669;
+  --dvla-amber:      #d97706;
+  --dvla-red:        #dc2626;
+
+  /* shadcn tokens */
+  --background:            0 0% 100%;
+  --foreground:            222 47% 11%;
+  --card:                  0 0% 100%;
+  --card-foreground:       222 47% 11%;
+  --popover:               0 0% 100%;
+  --popover-foreground:    222 47% 11%;
+  --primary:               221 83% 33%;
+  --primary-foreground:    210 40% 98%;
+  --secondary:             210 40% 96%;
+  --secondary-foreground:  222 47% 11%;
+  --muted:                 210 40% 96%;
+  --muted-foreground:      215 16% 47%;
+  --accent:                210 40% 96%;
+  --accent-foreground:     222 47% 11%;
+  --destructive:           0 84% 60%;
+  --destructive-foreground:210 40% 98%;
+  --border:                214 32% 91%;
+  --input:                 214 32% 91%;
+  --ring:                  221 83% 53%;
+  --radius:                0.5rem;
+}
+
+* { border-color: hsl(var(--border)); }
+
+body {
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-feature-settings: "cv02","cv03","cv04","cv11";
+  -webkit-font-smoothing: antialiased;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Playfair Display", "Inter", system-ui, sans-serif;
+  letter-spacing: -0.025em;
+}
+
+/* Status badges */
+.badge-draft     { @apply bg-slate-100  text-slate-700  border border-slate-200  text-xs px-2 py-0.5 rounded-full font-medium; }
+.badge-submitted { @apply bg-blue-50    text-blue-700   border border-blue-200   text-xs px-2 py-0.5 rounded-full font-medium; }
+.badge-approved  { @apply bg-green-50   text-green-700  border border-green-200  text-xs px-2 py-0.5 rounded-full font-medium; }
+.badge-rejected  { @apply bg-red-50     text-red-700    border border-red-200    text-xs px-2 py-0.5 rounded-full font-medium; }
+.badge-printed   { @apply bg-purple-50  text-purple-700 border border-purple-200 text-xs px-2 py-0.5 rounded-full font-medium; }
+.badge-issued    { @apply bg-teal-50    text-teal-700   border border-teal-200   text-xs px-2 py-0.5 rounded-full font-medium; }
+.badge-queued    { @apply bg-amber-50   text-amber-700  border border-amber-200  text-xs px-2 py-0.5 rounded-full font-medium; }
+.badge-complete  { @apply bg-green-50   text-green-700  border border-green-200  text-xs px-2 py-0.5 rounded-full font-medium; }
+.badge-error     { @apply bg-red-50     text-red-700    border border-red-200    text-xs px-2 py-0.5 rounded-full font-medium; }
+.badge-pass      { @apply bg-green-50   text-green-700  border border-green-200  text-xs px-2 py-0.5 rounded-full font-medium; }
+.badge-fail      { @apply bg-red-50     text-red-700    border border-red-200    text-xs px-2 py-0.5 rounded-full font-medium; }
+.badge-pending   { @apply bg-amber-50   text-amber-700  border border-amber-200  text-xs px-2 py-0.5 rounded-full font-medium; }
