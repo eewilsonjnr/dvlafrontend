@@ -1,0 +1,50 @@
+name: Deploy pre-live (Hetzner)
+
+# Builds the frontend image ON the Hetzner box via a self-hosted runner and
+# redeploys it. GitHub-hosted runners are not used (Actions minutes are over
+# quota); self-hosted runner minutes are free.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-frontend-prelive
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, dvla-prelive]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync source into deploy dir
+        run: |
+          rsync -a --delete \
+            --exclude '.git/' \
+            --exclude 'node_modules/' \
+            --exclude '.next/' \
+            --exclude '.env' \
+            --exclude '.env.*' \
+            --exclude 'tsconfig.tsbuildinfo' \
+            ./ /opt/dvla/frontend/
+
+      # NEXT_PUBLIC_API_URL is read from /opt/dvla/.env as a build arg by compose.
+      - name: Build & deploy frontend
+        working-directory: /opt/dvla
+        run: docker compose up -d --build frontend
+
+      - name: Health check
+        run: |
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://dvla.3dt.com.gh || true)
+            if [ "$code" = "200" ]; then echo "✅ frontend up"; exit 0; fi
+            echo "waiting for frontend... ($i: $code)"; sleep 3
+          done
+          echo "❌ frontend check failed"; cd /opt/dvla && docker compose logs frontend --tail=60; exit 1
+
+      - name: Prune dangling images
+        if: always()
+        run: docker image prune -f

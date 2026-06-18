@@ -14,9 +14,18 @@ bundle at build time**, so the API URL must be set _before_ `next build` — not
 
 ## Deployment (pre-live)
 
-Image is **built on the server** (no CI/registry) via `Dockerfile` (`npm ci` → `next build` →
-`next start` on :3000). Served at `https://dvla.3dt.com.gh` behind Caddy. Orchestration lives in
-the backend repo under `deploy/`.
+Image is **built on the server** via `Dockerfile` (`npm ci` → `next build` → `next start` on
+:3000). Served at `https://dvla.3dt.com.gh` behind Caddy. Orchestration lives in the backend repo
+under `deploy/`.
+
+## CI/CD (pre-live)
+
+Push to `master` auto-deploys via `.github/workflows/deploy-prelive.yml`, which runs on a
+**self-hosted GitHub Actions runner on the Hetzner box** (GitHub-hosted runners are over quota;
+self-hosted minutes are free). The workflow rsyncs the checkout into `/opt/dvla/frontend` and runs
+`docker compose up -d --build frontend` (image built on the box), then health-checks
+`https://dvla.3dt.com.gh`. `NEXT_PUBLIC_API_URL` is supplied as a build arg from `/opt/dvla/.env`.
+Manual run via the workflow's "Run workflow" (workflow_dispatch).
 
 ## Tooling
 
