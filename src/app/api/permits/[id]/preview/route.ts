@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "http://localhost:5000";
+// Use server-only var first (not exposed to browser), fall back to public var
+const BACKEND = (process.env.BACKEND_URL ?? process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ?? "http://localhost:5000");
 
 export async function GET(
   req: NextRequest,
