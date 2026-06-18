@@ -146,15 +146,15 @@ export default function PermitDetailPage() {
       align-items: center; padding: 20px; gap: 16px;
     }
     iframe { display: block; border: none; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.5); }
-    .idp-frame  { width: 17.6cm; height: 12.5cm; }
-    .icmv-frame { width: 8.8cm;  height: 12.5cm; }
+    .idp-frame  { width: 8.8cm; height: 25cm; }
+    .icmv-frame { width: 8.8cm; height: 12.5cm; }
     @media print {
       #toolbar { display: none; }
       #page-wrap { margin: 0; padding: 0; }
       body { background: white; }
       iframe { box-shadow: none; }
-      .idp-frame  { @page { size: 17.6cm 12.5cm; margin: 0; } width: 17.6cm; height: 12.5cm; }
-      .icmv-frame { @page { size: 8.8cm  12.5cm; margin: 0; } width: 8.8cm;  height: 12.5cm; }
+      .idp-frame  { @page { size: 8.8cm 12.5cm; margin: 0; } width: 8.8cm; height: 12.5cm; }
+      .icmv-frame { @page { size: 8.8cm 12.5cm; margin: 0; } width: 8.8cm; height: 12.5cm; }
     }
   </style>
 </head>
