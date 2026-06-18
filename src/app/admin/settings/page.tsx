@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const CONFIG_KEYS = [
-  { key: "printer_api_endpoint",    label: "Printer API Endpoint",        desc: "Matica P4000 printer API URL" },
-  { key: "printer_name",            label: "Printer Name",                desc: "Display name for the printer" },
+  { key: "printer_name",            label: "Printer Name",                desc: "Exact name of the Surys P400 as it appears in the OS printer list (e.g. 'Surys P400'). Used by the local print agent." },
+  { key: "printer_agent_port",      label: "Print Agent Port",            desc: "Port the local DVLA Print Agent listens on (default: 6161). Change only if you have a port conflict." },
+  { key: "printer_api_endpoint",    label: "Printer API Endpoint",        desc: "Optional: direct printer API URL if the printer exposes a REST status endpoint" },
   { key: "issuing_authority",       label: "Issuing Authority",           desc: "Authority name printed on permits" },
   { key: "sla_days",                label: "SLA Target (Days)",           desc: "Target days for permit processing" },
   { key: "dvla_db_api_endpoint",    label: "DVLA Central DB API URL",     desc: "DVLA Central Database REST API endpoint" },

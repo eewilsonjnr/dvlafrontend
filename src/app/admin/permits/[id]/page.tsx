@@ -97,32 +97,120 @@ export default function PermitDetailPage() {
   const openPreview = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`/api/permits/${params.id}/preview`, {
-        headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
-      });
+      const [res, printerNameCfg, agentPortCfg] = await Promise.all([
+        fetch(`/api/permits/${params.id}/preview`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
+        }),
+        api.get("/admin/config/printer_name").then(r => r.data?.value ?? "Surys P400").catch(() => "Surys P400"),
+        api.get("/admin/config/printer_agent_port").then(r => r.data?.value ?? "6161").catch(() => "6161"),
+      ]);
       if (!res.ok) throw new Error("preview failed");
       const blob = await res.blob();
+      const pdfBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.readAsDataURL(blob);
+      });
       const pdfUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+      const permitType = permit?.permitType ?? "IDP";
+      const refNum = permit?.referenceNumber ?? "permit";
+      const agentUrl = `http://localhost:${agentPortCfg}`;
 
-      // Open in a wrapper page that sets print size to exact booklet dimensions
       const html = `<!DOCTYPE html>
 <html>
 <head>
-  <title>Print Preview</title>
+  <title>Print Preview — ${refNum}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #666; display: flex; justify-content: center; align-items: flex-start; padding: 20px; }
-    iframe { display: block; width: 8.8cm; height: 25cm; border: none; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.4); }
+    body { background: #555; font-family: sans-serif; }
+    #toolbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 48px;
+      background: #1a3a6b; display: flex; align-items: center; gap: 10px;
+      padding: 0 16px; z-index: 100; box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    #toolbar span { color: #fff; font-size: 13px; font-weight: 600; flex: 1; }
+    #toolbar button {
+      padding: 6px 14px; border: none; border-radius: 4px; font-size: 12px;
+      font-weight: 600; cursor: pointer;
+    }
+    #btn-print { background: #006B3F; color: #fff; }
+    #btn-print:hover { background: #005530; }
+    #btn-agent { background: #CE1126; color: #fff; }
+    #btn-agent:hover { background: #a50e1f; }
+    #agent-status {
+      font-size: 11px; color: #aad4ff; display: none; margin-left: 4px;
+    }
+    #page-wrap {
+      margin-top: 68px; display: flex; flex-direction: column;
+      align-items: center; padding: 20px; gap: 16px;
+    }
+    iframe { display: block; border: none; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.5); }
+    .idp-frame  { width: 17.6cm; height: 12.5cm; }
+    .icmv-frame { width: 8.8cm;  height: 12.5cm; }
     @media print {
-      @page { size: 8.8cm 12.5cm; margin: 0; }
-      body { background: white; padding: 0; }
-      iframe { width: 8.8cm; height: 12.5cm; box-shadow: none; }
+      #toolbar { display: none; }
+      #page-wrap { margin: 0; padding: 0; }
+      body { background: white; }
+      iframe { box-shadow: none; }
+      .idp-frame  { @page { size: 17.6cm 12.5cm; margin: 0; } width: 17.6cm; height: 12.5cm; }
+      .icmv-frame { @page { size: 8.8cm  12.5cm; margin: 0; } width: 8.8cm;  height: 12.5cm; }
     }
   </style>
 </head>
 <body>
-  <iframe src="${pdfUrl}"></iframe>
+  <div id="toolbar">
+    <span>📄 ${refNum} &nbsp;·&nbsp; ${permitType}</span>
+    <span id="agent-status">⏳ Sending to P400…</span>
+    <button id="btn-agent" title="Send directly to Surys P400 printer (requires local print agent)">
+      🖨 Print to P400
+    </button>
+    <button id="btn-print" title="Open browser print dialog">
+      🖨 Print (dialog)
+    </button>
+  </div>
+  <div id="page-wrap">
+    <iframe src="${pdfUrl}" class="${permitType === 'IDP' ? 'idp-frame' : 'icmv-frame'}"></iframe>
+  </div>
+  <script>
+    document.getElementById('btn-print').onclick = () => window.print();
+
+    document.getElementById('btn-agent').onclick = async () => {
+      const status = document.getElementById('agent-status');
+      const btn = document.getElementById('btn-agent');
+      status.style.display = 'inline';
+      status.textContent = '⏳ Sending to ${printerNameCfg}…';
+      btn.disabled = true;
+      try {
+        const resp = await fetch('${agentUrl}/print', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pdf: '${pdfBase64}',
+            permitType: '${permitType}',
+            reference: '${refNum}',
+            printerName: '${printerNameCfg}',
+          }),
+        });
+        const data = await resp.json();
+        if (resp.ok) {
+          status.textContent = '✅ Sent to ${printerNameCfg}!';
+          status.style.color = '#90ee90';
+        } else {
+          throw new Error(data.error || 'Print failed');
+        }
+      } catch (e) {
+        const msg = e.message?.includes('Failed to fetch')
+          ? '❌ Print agent not running on port ${agentPortCfg} — use Print (dialog) instead'
+          : '❌ ' + e.message;
+        status.textContent = msg;
+        status.style.color = '#ff9999';
+      } finally {
+        btn.disabled = false;
+        setTimeout(() => { status.style.display = 'none'; status.style.color = '#aad4ff'; }, 6000);
+      }
+    };
+  </script>
 </body>
 </html>`;
 
