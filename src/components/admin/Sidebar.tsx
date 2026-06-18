@@ -4,7 +4,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, FilePlus, Camera, BookOpen,
-  Printer, Wifi, CheckSquare, FileText, Settings, Users,
+  Printer, FileText, Settings, Users,
   Building2, Globe, Network, Layers, BarChart2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,8 +30,6 @@ const navItems = [
   { href: "/admin/permits",          icon: BookOpen,        label: "Permits",           permission: "VIEW_PERMITS",     roles: ["Operator","Administrator","Supervisor"] },
   { href: "/admin/biometric",        icon: Camera,          label: "Biometric Capture", permission: "UPLOAD_BIOMETRIC", roles: ["Operator","Administrator"] },
   { href: "/admin/print-queue",      icon: Printer,         label: "Print Queue",       permission: "MANAGE_PRINT",     roles: ["Operator","Administrator"] },
-  { href: "/admin/rfid",             icon: Wifi,            label: "RFID Encoding",     permission: "MANAGE_RFID",      roles: ["Operator","Administrator"] },
-  { href: "/admin/qc-results",       icon: CheckSquare,     label: "QC Results",        permission: "MANAGE_QC",        roles: ["Operator","Administrator","Supervisor"] },
   { href: "/admin/reports",          icon: BarChart2,       label: "Reports",           permission: "VIEW_PERMITS",     roles: ["Operator","Administrator","Supervisor"] },
   { href: "/admin/audit",            icon: FileText,        label: "Audit Log",         permission: "VIEW_AUDIT_LOGS",  roles: ["Operator","Administrator","Supervisor"] },
   { href: "/admin/users",            icon: Users,           label: "User Management",   permission: "MANAGE_USERS",     roles: ["Administrator"] },
@@ -46,7 +44,7 @@ const SECTIONS = [
   },
   {
     title: "Production",
-    items: ["Print Queue","RFID Encoding","QC Results"],
+    items: ["Print Queue"],
   },
   {
     title: "Administration",
