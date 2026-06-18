@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Use server-only var first (not exposed to browser), fall back to public var
-const BACKEND = (process.env.BACKEND_URL ?? process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ?? "http://localhost:5000");
+// Use server-only var first (not exposed to browser), fall back to public var.
+// Anchor the replace to a TRAILING "/api" so an "https://api.*" host isn't mangled.
+const BACKEND =
+  process.env.BACKEND_URL ??
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, "") ??
+  "http://localhost:5000";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const auth = req.headers.get("authorization") ?? "";
 
